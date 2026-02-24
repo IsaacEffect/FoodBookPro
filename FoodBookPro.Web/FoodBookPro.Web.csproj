@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FoodBookPro.Data\FoodBookPro.Data.csproj" />
+  </ItemGroup>
+
 </Project>
