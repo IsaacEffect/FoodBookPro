@@ -9,6 +9,10 @@ namespace FoodBookPro.Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Sesion para el carrito (almacenamiento en memoria)
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -17,6 +21,7 @@ namespace FoodBookPro.Web
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
+            app.UseSession();
 
             app.UseRouting();
 
