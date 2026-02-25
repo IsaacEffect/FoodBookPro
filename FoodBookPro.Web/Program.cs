@@ -1,8 +1,3 @@
-using FoodBookPro.Data.Context;
-using FoodBookPro.Data.Interfaces;
-using FoodBookPro.Data.Repositories;
-using Microsoft.EntityFrameworkCore;
-
 namespace FoodBookPro.Web
 {
     public class Program
@@ -14,10 +9,9 @@ namespace FoodBookPro.Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddDbContext<FoodbookDbContext>(options =>
-            options.UseInMemoryDatabase("FoodbookDb"));
-
-            builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+            // Sesion para el carrito (almacenamiento en memoria)
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
 
             var app = builder.Build();
 
@@ -27,6 +21,7 @@ namespace FoodBookPro.Web
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
+            app.UseSession();
 
             app.UseRouting();
 
