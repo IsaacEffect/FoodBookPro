@@ -1,0 +1,76 @@
+@model FoodBookPro.Web.Models.OrderListViewModel
+@using FoodBookPro.Data.Entities
+@{
+    ViewData["Title"] = "Mis Ordenes";
+}
+
+<h2>Mis Ordenes</h2>
+
+@* Filtros *@
+<form method="get" asp-action="Index" class="mb-4 p-3 bg-light rounded">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-select">
+                <option value="">Todos</option>
+                @foreach (EstadoOrden e in Enum.GetValues(typeof(EstadoOrden)))
+                {
+                    <option value="@((int)e)" selected="@(Model.FiltroEstado == e)">@e</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Fecha desde</label>
+            <input type="date" name="fechaDesde" class="form-control" value="@Model.FiltroFechaDesde?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Fecha hasta</label>
+            <input type="date" name="fechaHasta" class="form-control" value="@Model.FiltroFechaHasta?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Restaurante</label>
+            <input type="text" name="restaurante" class="form-control" placeholder="Nombre..." value="@Model.FiltroRestaurante" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+    </div>
+</form>
+
+@* Lista de ordenes *@
+@if (Model.Orders.Count == 0)
+{
+    <p>No hay ordenes que mostrar.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Restaurante</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.Orders)
+            {
+                <tr>
+                    <td>@order.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@order.RestauranteNombre</td>
+                    <td><span class="badge bg-secondary">@order.Estado</span></td>
+                    <td>@order.Total.ToString("C")</td>
+                    <td>
+                        <a asp-action="Detail" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                        @if (order.Estado == EstadoOrden.Completada)
+                        {
+                            <a asp-action="Reorder" asp-route-id="@order.Id" class="btn btn-sm btn-outline-success">Reordenar</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

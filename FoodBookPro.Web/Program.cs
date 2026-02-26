@@ -1,3 +1,6 @@
+using FoodBookPro.Data.Context;
+using Microsoft.EntityFrameworkCore;
+
 namespace FoodBookPro.Web
 {
     public class Program
@@ -6,10 +9,19 @@ namespace FoodBookPro.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<FoodbookDbContext>(options =>
+                options.UseInMemoryDatabase("FoodbookDb"));
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<FoodbookDbContext>();
+                db.SeedData();
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -17,6 +29,7 @@ namespace FoodBookPro.Web
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
+            app.UseSession();
 
             app.UseRouting();
 
