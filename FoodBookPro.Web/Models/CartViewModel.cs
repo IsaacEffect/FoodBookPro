@@ -8,5 +8,7 @@ public class CartViewModel
     public List<CartItemViewModel> Items { get; set; } = new();
     public string RestauranteNombre { get; set; } = string.Empty;
 
+
+    // Total general del carrito
     public decimal Total => Items.Sum(i => i.Subtotal);
 }

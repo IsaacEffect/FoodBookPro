@@ -15,6 +15,10 @@ namespace FoodBookPro.Web
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession();
 
+            // Sesion para el carrito (almacenamiento en memoria)
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
+
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
