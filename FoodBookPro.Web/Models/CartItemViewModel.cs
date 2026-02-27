@@ -1,7 +1,7 @@
 namespace FoodBookPro.Web.Models;
 
 /// <summary>
-/// Representa un item en el carrito de compras
+/// Item en el carrito para reordenar
 /// </summary>
 public class CartItemViewModel
 {
