@@ -5,12 +5,14 @@ namespace FoodBookPro.Data.Context
 {
     public class FoodbookDbContext : DbContext
     {
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderItem> OrderItems { get; set; }
-
         public FoodbookDbContext() { }
 
         public FoodbookDbContext(DbContextOptions<FoodbookDbContext> options) : base(options) { }
+
+        public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -20,6 +22,14 @@ namespace FoodBookPro.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Cliente>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Nombre).IsRequired().HasMaxLength(100);
+                entity.Property(c => c.Email).IsRequired().HasMaxLength(150);
+                entity.HasIndex(c => c.Email).IsUnique();
+            });
+
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Order)
                 .WithMany(o => o.Items)
@@ -27,19 +37,20 @@ namespace FoodBookPro.Data.Context
         }
 
         /// <summary>
-        /// Carga datos de ejemplo para desarrollo
+        /// Carga datos de ejemplo para desarrollo (XAV-176)
         /// </summary>
         public void SeedData()
         {
             if (Orders.Any()) return;
 
+            var now = DateTime.Now;
             var orders = new List<Order>
             {
-                new Order { Id = 1, Fecha = DateTime.Now.AddDays(-3), Estado = EstadoOrden.Completada, RestauranteNombre = "Pizza Palace", Total = 25.50m },
-                new Order { Id = 2, Fecha = DateTime.Now.AddDays(-1), Estado = EstadoOrden.Preparando, RestauranteNombre = "Burger Spot", Total = 18.00m },
-                new Order { Id = 3, Fecha = DateTime.Now, Estado = EstadoOrden.Pendiente, RestauranteNombre = "Sushi Bar", Total = 42.75m },
-                new Order { Id = 4, Fecha = DateTime.Now.AddDays(-5), Estado = EstadoOrden.Completada, RestauranteNombre = "Pizza Palace", Total = 15.00m },
-                new Order { Id = 5, Fecha = DateTime.Now.AddDays(-2), Estado = EstadoOrden.Cancelada, RestauranteNombre = "Burger Spot", Total = 12.00m }
+                new Order { Id = 1, Fecha = now.AddDays(-3), Estado = EstadoOrden.Completada, RestauranteNombre = "Pizza Palace", Total = 25.50m, HoraRetiro = now.AddDays(-3).AddMinutes(30) },
+                new Order { Id = 2, Fecha = now.AddDays(-1), Estado = EstadoOrden.Preparando, RestauranteNombre = "Burger Spot", Total = 18.00m, HoraRetiro = now.AddDays(-1).AddMinutes(45), FechaPreparacionInicio = now.AddMinutes(-10) },
+                new Order { Id = 3, Fecha = now, Estado = EstadoOrden.Pendiente, RestauranteNombre = "Sushi Bar", Total = 42.75m, HoraRetiro = now.AddMinutes(60) },
+                new Order { Id = 4, Fecha = now.AddDays(-5), Estado = EstadoOrden.Completada, RestauranteNombre = "Pizza Palace", Total = 15.00m, HoraRetiro = now.AddDays(-5).AddMinutes(20) },
+                new Order { Id = 5, Fecha = now.AddDays(-2), Estado = EstadoOrden.Cancelada, RestauranteNombre = "Burger Spot", Total = 12.00m, HoraRetiro = now.AddDays(-2).AddMinutes(30) }
             };
 
             Orders.AddRange(orders);

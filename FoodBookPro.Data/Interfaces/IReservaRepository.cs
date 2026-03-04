@@ -1,6 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FoodBookPro.Data.Entities;
+
+namespace FoodBookPro.Data.Interfaces;
 
 public interface IReservaRepository
 {
