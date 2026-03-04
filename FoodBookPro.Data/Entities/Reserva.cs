@@ -1,4 +1,6 @@
-﻿using System;
+using System;
+
+namespace FoodBookPro.Data.Entities;
 
 public class Reserva
 {

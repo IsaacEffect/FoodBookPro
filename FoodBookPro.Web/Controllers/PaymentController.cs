@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using FoodBookPro.Data.Context;
 using FoodBookPro.Data.Entities;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace FoodBookPro.Web.Controllers
             // Creamos una orden de prueba si no existe ninguna
             if (!_context.Orders.Any())
             {
-                _context.Orders.Add(new Order { Id = 1, CustomerName = "Cliente X-Men", Total = 50.00m, Status = "Pendiente" });
+                _context.Orders.Add(new Order { Id = 1, Fecha = DateTime.Now, Estado = EstadoOrden.Pendiente, RestauranteNombre = "Test", CustomerName = "Cliente X-Men", Total = 50.00m });
                 _context.SaveChanges();
             }
         }

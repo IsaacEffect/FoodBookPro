@@ -1,6 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FoodBookPro.Data.Entities;
+using FoodBookPro.Data.Interfaces;
+
+namespace FoodBookPro.Data.Repositories;
 
 public class ReservaRepository : IReservaRepository
 {
@@ -74,7 +78,7 @@ public class ReservaRepository : IReservaRepository
         if (estado.HasValue)
             query = query.Where(r => r.Estado == estado.Value);
 
-        return Task.FromResult(query.OrderBy(r => r.FechaHora));
+        return Task.FromResult(query.OrderBy(r => r.FechaHora).AsEnumerable());
     }
 
     // ── Gestión de estado ────────────────────────────────────────────

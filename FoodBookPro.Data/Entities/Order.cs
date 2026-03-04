@@ -12,6 +12,16 @@ public class Order
     public decimal Total { get; set; }
 
     /// <summary>
+    /// Nombre del cliente (para modulo Payment/Checkout)
+    /// </summary>
+    public string CustomerName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Estado como texto (compatibilidad con Payment)
+    /// </summary>
+    public string Status => Estado.ToString();
+
+    /// <summary>
     /// Hora prevista de retiro del pedido (criterio XAV-194: filtros por hora de retiro)
     /// </summary>
     public DateTime? HoraRetiro { get; set; }

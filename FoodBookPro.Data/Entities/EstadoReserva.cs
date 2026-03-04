@@ -1,9 +1,9 @@
-﻿using System;
+namespace FoodBookPro.Data.Entities;
 
-public Enum EstadoReserva
+public enum EstadoReserva
 {
     Pendiente = 0,
-        Confirmada = 1,
-        Rechazada = 2,
-        Cancelada = 3
+    Confirmada = 1,
+    Rechazada = 2,
+    Cancelada = 3
 }
