@@ -21,6 +21,12 @@ namespace FoodBookPro.Web
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<FoodbookDbContext>();
+                db.SeedData();
+            }
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
