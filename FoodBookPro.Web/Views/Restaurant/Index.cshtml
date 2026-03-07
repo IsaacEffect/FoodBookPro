@@ -1,49 +1,78 @@
-﻿@model List<FoodBookPro.Data.Entities.Restaurant>
+@model IEnumerable<FoodBookPro.Data.Entities.Restaurant>
 
 @{
     ViewData["Title"] = "Explorar Restaurantes";
 }
 
 <div class="container mt-4">
-    <h2 class="mb-4 text-center">Encuentra tu próximo lugar favorito</h2>
-
-    <div class="card shadow-sm p-4 mb-5 bg-white rounded">
-        <form asp-action="Index" method="get" class="row g-3">
-            <div class="col-md-5">
-                <label class="form-label fw-bold">Nombre del Restaurante</label>
-                <input type="text" name="searchTerm" class="form-control" placeholder="Ej: Pizza Planeta..." value="@ViewBag.SearchTerm">
-            </div>
-            <div class="col-md-5">
-                <label class="form-label fw-bold">Ciudad o Zona</label>
-                <input type="text" name="location" class="form-control" placeholder="Ej: Santo Domingo..." value="@ViewBag.Location">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100 shadow-sm">
-                    <i class="fas fa-search"></i> Buscar
-                </button>
-            </div>
-        </form>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Explorar Restaurantes</h2>
+        <span class="badge bg-primary fs-6">Se encontraron @ViewBag.TotalResults resultados</span>
     </div>
 
-    <div class="row">
+    <form asp-action="Index" method="get" class="card card-body bg-light mb-4 shadow-sm">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Nombre o Ciudad</label>
+                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control" placeholder="Ej: Pizza Planeta...">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Especialidad</label>
+                <select name="cuisine" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="Italiana">Italiana</option>
+                    <option value="Hamburguesas">Hamburguesas</option>
+                    <option value="Japonesa">Japonesa</option>
+                    <option value="Mexicana">Mexicana</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Precio Máximo</label>
+                <select name="priceRange" class="form-select">
+                    <option value="">Cualquiera</option>
+                    <option value="$">$ (Económico)</option>
+                    <option value="$$">$$ (Medio)</option>
+                    <option value="$$$">$$$ (Premium)</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Ordenar por</label>
+                <select name="sortBy" class="form-select">
+                    <option value="name">Relevancia</option>
+                    <option value="rating">Mejor Calificación</option>
+                    <option value="price">Precio más bajo</option>
+                    <option value="distance">Más cercanos</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-success w-100">Aplicar Filtros</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
         @if (Model.Any())
         {
             @foreach (var item in Model)
             {
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 border-0 shadow-sm hover-shadow">
-                        <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover; border-radius: 10px 10px 0 0;">
-
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <img src="@item.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 10px 10px 0 0;" alt="@item.Name">
                         <div class="card-body">
-                            <h5 class="card-title fw-bold">@item.Name</h5>
-                            <p class="text-muted mb-2"><i class="fas fa-utensils me-2"></i>@item.CuisineType • @item.City</p>
-
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-star me-1"></i> @item.Rating
-                                </span>
-                                <a href="#" class="btn btn-outline-primary btn-sm rounded-pill">Ver Menú</a>
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title fw-bold">@item.Name</h5>
+                                <span class="badge bg-warning text-dark">⭐ @item.Rating</span>
                             </div>
+                            <p class="card-text text-muted mb-1">@item.CuisineType • @item.PriceRange</p>
+                            <p class="card-text"><small class="text-muted">📍 @item.City (@item.Distance km)</small></p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 pb-3">
+                            <a href="#" class="btn btn-outline-primary w-100 rounded-pill">Ver Menú</a>
                         </div>
                     </div>
                 </div>
@@ -59,18 +88,20 @@
 
     @if (ViewBag.TotalPages > 1)
     {
-        <nav aria-label="Navegación de resultados" class="mt-4">
+        <nav aria-label="Navegación de resultados" class="mt-5">
             <ul class="pagination justify-content-center">
                 @for (int i = 1; i <= ViewBag.TotalPages; i++)
                 {
                     <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
                         <a class="page-link" asp-action="Index"
                            asp-route-page="@i"
-                           asp-route-searchTerm="@ViewBag.SearchTerm"
-                           asp-route-location="@ViewBag.Location">@i</a>
+                           asp-route-searchString="@ViewBag.CurrentSearch"
+                           asp-route-cuisine="@ViewBag.CurrentCuisine"
+                           asp-route-priceRange="@ViewBag.CurrentPrice">@i</a>
                     </li>
                 }
             </ul>
         </nav>
     }
+</div>
 </div>

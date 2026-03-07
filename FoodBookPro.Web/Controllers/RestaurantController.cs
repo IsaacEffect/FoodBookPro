@@ -5,51 +5,63 @@ using System.Linq;
 
 namespace FoodBookPro.Web.Controllers
 {
-    public class RestaurantController : Controller
+public class RestaurantController : Controller
     {
         private readonly FoodbookDbContext _context;
-        private const int PageSize = 10; // Criterio XAV-26: 10 resultados por página
+        private const int PageSize = 10; // Mantenemos el criterio de XAV-26
 
-        public RestaurantController()
+        // Usamos tu constructor con Inyección de Dependencias (XAV-34)
+        public RestaurantController(FoodbookDbContext context)
         {
-            _context = new FoodbookDbContext();
-
-            // ¡CRÍTICO! Esta línea carga los 12 restaurantes del Seed Data 
-            // en la base de datos en memoria.
-            _context.Database.EnsureCreated();
+            _context = context;
         }
 
-        public IActionResult Index(string searchTerm, string location, int page = 1)
+        public IActionResult Index(string searchString, string cuisine, string priceRange, double? minRating, double? maxDistance, string sortBy, int page = 1)
         {
             var query = _context.Restaurants.AsQueryable();
 
-            // Criterio XAV-26: Búsqueda por nombre (Case-Insensitive)
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                var term = searchTerm.ToLower();
-                query = query.Where(r => r.Name.ToLower().Contains(term));
-            }
+            // --- 1. Tus Filtros Avanzados (XAV-34) ---
+            if (!string.IsNullOrEmpty(searchString))
+                query = query.Where(r => r.Name.Contains(searchString) || r.City.Contains(searchString));
 
-            // Criterio XAV-26: Búsqueda por ciudad/zona (Case-Insensitive)
-            if (!string.IsNullOrEmpty(location))
-            {
-                var loc = location.ToLower();
-                query = query.Where(r => r.City.ToLower().Contains(loc));
-            }
+            if (!string.IsNullOrEmpty(cuisine))
+                query = query.Where(r => r.CuisineType == cuisine);
 
-            // Lógica de Paginación funcional
+            if (!string.IsNullOrEmpty(priceRange))
+                query = query.Where(r => r.PriceRange == priceRange);
+
+            if (minRating.HasValue)
+                query = query.Where(r => r.Rating >= minRating.Value);
+
+            if (maxDistance.HasValue)
+                query = query.Where(r => r.Distance <= maxDistance.Value);
+
+            // --- 2. Tu Lógica de Ordenamiento (XAV-34) ---
+            query = sortBy switch
+            {
+                "rating" => query.OrderByDescending(r => r.Rating),
+                "price" => query.OrderBy(r => r.PriceRange.Length),
+                "distance" => query.OrderBy(r => r.Distance),
+                _ => query.OrderBy(r => r.Name)
+            };
+
+            // --- 3. Paginación de develop (XAV-26) ---
             var totalItems = query.Count();
             var results = query
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
 
-            ViewBag.CurrentPage = page;
+            // --- 4. Datos para la Vista (ViewBag) ---
+            ViewBag.TotalResults = totalItems;
             ViewBag.TotalPages = (int)System.Math.Ceiling(totalItems / (double)PageSize);
-            ViewBag.SearchTerm = searchTerm;
-            ViewBag.Location = location;
+            ViewBag.CurrentPage = page;
+            ViewBag.CurrentSearch = searchString;
+            ViewBag.CurrentCuisine = cuisine;
+            ViewBag.CurrentPrice = priceRange;
 
             return View(results);
+        }
         }
     }
 }
