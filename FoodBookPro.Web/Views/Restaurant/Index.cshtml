@@ -1,4 +1,8 @@
-﻿@model IEnumerable<FoodBookPro.Data.Entities.Restaurant>
+@model IEnumerable<FoodBookPro.Data.Entities.Restaurant>
+
+@{
+    ViewData["Title"] = "Explorar Restaurantes";
+}
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -6,7 +10,7 @@
         <span class="badge bg-primary fs-6">Se encontraron @ViewBag.TotalResults resultados</span>
     </div>
 
-    <form asp-action="Index" method="get" class="card card-body bg-light mb-4">
+    <form asp-action="Index" method="get" class="card card-body bg-light mb-4 shadow-sm">
         <div class="row g-3">
             <div class="col-md-3">
                 <label class="form-label fw-bold">Nombre o Ciudad</label>
@@ -52,24 +56,52 @@
     </form>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var item in Model)
+        @if (Model.Any())
         {
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="@item.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@item.Name">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="card-title">@item.Name</h5>
-                            <span class="text-warning fw-bold">⭐ @item.Rating</span>
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        <img src="@item.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 10px 10px 0 0;" alt="@item.Name">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title fw-bold">@item.Name</h5>
+                                <span class="badge bg-warning text-dark">⭐ @item.Rating</span>
+                            </div>
+                            <p class="card-text text-muted mb-1">@item.CuisineType • @item.PriceRange</p>
+                            <p class="card-text"><small class="text-muted">📍 @item.City (@item.Distance km)</small></p>
                         </div>
-                        <p class="card-text text-muted mb-1">@item.CuisineType • @item.PriceRange</p>
-                        <p class="card-text"><small class="text-muted">📍 @item.City (@item.Distance km)</small></p>
-                    </div>
-                    <div class="card-footer bg-transparent border-top-0 pb-3">
-                        <a href="#" class="btn btn-outline-primary w-100">Ver Menú</a>
+                        <div class="card-footer bg-transparent border-top-0 pb-3">
+                            <a href="#" class="btn btn-outline-primary w-100 rounded-pill">Ver Menú</a>
+                        </div>
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <h4 class="text-muted">No encontramos restaurantes que coincidan con tu búsqueda.</h4>
             </div>
         }
     </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Navegación de resultados" class="mt-5">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-searchString="@ViewBag.CurrentSearch"
+                           asp-route-cuisine="@ViewBag.CurrentCuisine"
+                           asp-route-priceRange="@ViewBag.CurrentPrice">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
 </div>
