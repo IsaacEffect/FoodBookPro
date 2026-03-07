@@ -1,0 +1,44 @@
+﻿@model FoodBookPro.Data.Entities.Payment
+
+@{
+    ViewData["Title"] = "¡Gracias por tu compra!";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 text-center p-5">
+        <div class="mb-4">
+            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+        </div>
+        <h1 class="display-4 text-success">¡Pago Confirmado!</h1>
+        <p class="lead">Hemos enviado tu recibo digital a tu correo electrónico.</p>
+
+        <hr class="my-4" />
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 bg-light p-4 rounded">
+                <h5 class="text-muted mb-3">Resumen del Recibo</h5>
+                <ul class="list-unstyled text-left">
+                    <li class="d-flex justify-content-between mb-2">
+                        <span>Orden ID:</span> <strong>#@Model.OrderId</strong>
+                    </li>
+                    <li class="d-flex justify-content-between mb-2">
+                        <span>Método de Pago:</span> <strong>@Model.PaymentMethod</strong>
+                    </li>
+                    <li class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span> <strong>$@Model.Subtotal</strong>
+                    </li>
+                    <li class="d-flex justify-content-between mb-2">
+                        <span>Propina:</span> <strong class="text-success">+$@Model.TipAmount</strong>
+                    </li>
+                    <li class="d-flex justify-content-between mt-3 pt-3 border-top">
+                        <span class="h5">Total Pagado:</span> <span class="h5 text-primary">$@Model.TotalAmount</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <a href="/" class="btn btn-primary btn-lg px-5">Regresar al Menú</a>
+        </div>
+    </div>
+</div>

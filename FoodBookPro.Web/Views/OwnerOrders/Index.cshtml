@@ -1,0 +1,144 @@
+@model FoodBookPro.Web.Models.OwnerOrderListViewModel
+@using FoodBookPro.Data.Entities
+@{
+    ViewData["Title"] = "Panel de Ordenes";
+    var countPendientes = Model.Orders.Count(o => o.Estado == EstadoOrden.Pendiente);
+}
+
+<h2>Panel de Ordenes</h2>
+
+@* Notificacion visual de nuevas ordenes (criterio: notificacion sonora/visual) *@
+<div id="nuevaOrdenBadge" class="alert alert-warning d-none" role="alert">
+    <strong>Nueva orden pendiente.</strong> <a href="#" onclick="recargarYLimpiarNotif()">Ver</a>
+</div>
+
+@* Filtros (XAV-194: filtros por estado y hora de retiro) *@
+<form method="get" asp-action="Index" class="mb-4 p-3 bg-light rounded">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-select">
+                <option value="">Todos</option>
+                @foreach (EstadoOrden e in Enum.GetValues(typeof(EstadoOrden)))
+                {
+                    <option value="@((int)e)" selected="@(Model.FiltroEstado == e)">@e</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Hora retiro desde</label>
+            <input type="datetime-local" name="horaRetiroDesde" class="form-control" value="@(Model.FiltroHoraRetiroDesde?.ToString("yyyy-MM-ddTHH:mm"))" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Hora retiro hasta</label>
+            <input type="datetime-local" name="horaRetiroHasta" class="form-control" value="@(Model.FiltroHoraRetiroHasta?.ToString("yyyy-MM-ddTHH:mm"))" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <a asp-action="Kitchen" class="btn btn-success">Vista Cocina</a>
+        </div>
+    </div>
+</form>
+
+@* Lista de ordenes (panel en tiempo real) *@
+@if (Model.Orders.Count == 0)
+{
+    <p>No hay ordenes que mostrar.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Hora retiro</th>
+                <th>Restaurante</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Timer</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.Orders)
+            {
+                <tr data-order-id="@order.Id">
+                    <td>@order.Id</td>
+                    <td>@order.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(order.HoraRetiro?.ToString("HH:mm") ?? "-")</td>
+                    <td>@order.RestauranteNombre</td>
+                    <td><span class="badge bg-secondary">@order.Estado</span></td>
+                    <td>@order.Total.ToString("C")</td>
+                    <td>
+                        @if (order.Estado == EstadoOrden.Preparando && order.FechaPreparacionInicio.HasValue)
+                        {
+                            <span class="timer" data-inicio="@order.FechaPreparacionInicio.Value.ToString("O")">--:--</span>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Detail" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">Detalle</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    <script>
+        // Criterio: panel en tiempo real + notificacion sonora/visual de nueva orden
+        let ultimoCountPendientes = @countPendientes;
+
+        function reproducirNotificacion() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                gain.gain.value = 0.3;
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {}
+        }
+
+        function actualizarTimers() {
+            document.querySelectorAll('.timer').forEach(el => {
+                const inicio = new Date(el.dataset.inicio);
+                const diff = Math.floor((Date.now() - inicio.getTime()) / 1000);
+                const m = Math.floor(diff / 60);
+                const s = diff % 60;
+                el.textContent = (m + '').padStart(2, '0') + ':' + (s + '').padStart(2, '0');
+            });
+        }
+
+        function verificarNuevasOrdenes() {
+            fetch('@Url.Action("GetPendingCount", "OwnerOrders")')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.count > ultimoCountPendientes) {
+                        document.getElementById('nuevaOrdenBadge').classList.remove('d-none');
+                        reproducirNotificacion();
+                    }
+                    ultimoCountPendientes = data.count;
+                });
+        }
+
+        function recargarYLimpiarNotif() {
+            document.getElementById('nuevaOrdenBadge').classList.add('d-none');
+            window.location.reload();
+        }
+
+        setInterval(actualizarTimers, 1000);
+        setInterval(verificarNuevasOrdenes, 5000);
+        actualizarTimers();
+    </script>
+}

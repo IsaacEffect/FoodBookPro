@@ -1,0 +1,43 @@
+@model FoodBookPro.Web.Models.CartViewModel
+@{
+    ViewData["Title"] = "Carrito";
+}
+
+<h2>Carrito de reorden</h2>
+
+@if (!string.IsNullOrEmpty(Model.RestauranteNombre))
+{
+    <p><strong>Restaurante:</strong> @Model.RestauranteNombre</p>
+}
+
+@if (Model.Items.Count == 0)
+{
+    <p>El carrito esta vacio. Usa "Reordenar" en una orden completada para agregar items.</p>
+    <a asp-controller="Orders" asp-action="Index" class="btn btn-secondary">Ver mis ordenes</a>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.Subtotal.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p><strong>Total: @Model.Total.ToString("C")</strong></p>
+    <a asp-controller="Orders" asp-action="Index" class="btn btn-secondary">Volver a mis ordenes</a>
+}
