@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using FoodBookPro.Data.Context;
-using FoodBookPro.Data.Entities;
-using System.Linq;
+﻿using FoodBookPro.Data.Context;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FoodBookPro.Web.Controllers
 {
-public class RestaurantController : Controller
+    public class RestaurantController : Controller
     {
         private readonly FoodbookDbContext _context;
         private const int PageSize = 10; // Mantenemos el criterio de XAV-26
@@ -62,6 +60,6 @@ public class RestaurantController : Controller
 
             return View(results);
         }
-        }
+
     }
 }

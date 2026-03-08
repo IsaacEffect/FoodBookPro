@@ -5,13 +5,6 @@ namespace FoodBookPro.Data.Context
 {
     public class FoodbookDbContext : DbContext
     {
-using Microsoft.EntityFrameworkCore;
-using FoodBookPro.Data.Entities;
-
-namespace FoodBookPro.Data.Context
-{
-    public class FoodbookDbContext : DbContext
-    {
         public FoodbookDbContext() { }
 
         public FoodbookDbContext(DbContextOptions<FoodbookDbContext> options) : base(options) { }
@@ -21,7 +14,7 @@ namespace FoodBookPro.Data.Context
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Payment> Payments { get; set; }
-// XAV-34: Buscador y Filtros Avanzados
+        // XAV-34: Buscador y Filtros Avanzados
         public DbSet<Restaurant> Restaurants { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -64,7 +57,7 @@ namespace FoodBookPro.Data.Context
             );
         }
 
-/// <summary>
+        /// <summary>
         /// Carga datos de ejemplo para desarrollo (XAV-176 y XAV-34)
         /// </summary>
         public void SeedData()
@@ -81,7 +74,7 @@ namespace FoodBookPro.Data.Context
                 new Order { Id = 3, Fecha = now, Estado = EstadoOrden.Pendiente, RestauranteNombre = "Sushi Bar", Total = 42.75m, HoraRetiro = now.AddMinutes(60) }
             };
             Orders.AddRange(orders);
-var items = new List<OrderItem>
+            var items = new List<OrderItem>
             {
                 new OrderItem { Id = 1, OrderId = 1, ProductoNombre = "Pizza Margarita", Cantidad = 2, Precio = 12.75m },
                 new OrderItem { Id = 2, OrderId = 2, ProductoNombre = "Hamburguesa", Cantidad = 2, Precio = 9.00m },
