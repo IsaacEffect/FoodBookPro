@@ -1,10 +1,17 @@
-﻿using FoodBookPro.Data.Entities;
+﻿using FoodBookPro.Data.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodBookPro.Web.Controllers
 {
     public class ClienteController : Controller
     {
+        private readonly ClienteService _service;
+
+        public ClienteController(ClienteService service)
+        {
+            _service = service;
+        }
+
         [HttpGet]
         public IActionResult Registro()
         {
@@ -12,20 +19,17 @@ namespace FoodBookPro.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Registro(string nombre, string email, string password, string telefono)
+        public async Task<IActionResult> Registro(string nombre, string email, string password, string telefono)
         {
-            var cliente = new Cliente
+            try
             {
-                Id = Guid.NewGuid(),
-                Nombre = nombre,
-                Email = email,
-                Telefono = telefono,
-                PasswordHash = password
-            };
-
-            //en proceso
-
-            return Content("Cliente creado");
+                await _service.RegistrarAsync(nombre, email, password, telefono);
+                return Content("Cliente creado correctamente");
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
         }
     }
 }
