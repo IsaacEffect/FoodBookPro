@@ -2,10 +2,6 @@ using FoodBookPro.Data.Entities;
 
 namespace FoodBookPro.Web.Models;
 
-/// <summary>
-/// Vista para el panel de ordenes del propietario (XAV-176)
-/// Criterio: Panel de ordenes en tiempo real, filtros por estado y hora de retiro
-/// </summary>
 public class OwnerOrderListViewModel
 {
     public List<OwnerOrderListItemViewModel> Orders { get; set; } = new();

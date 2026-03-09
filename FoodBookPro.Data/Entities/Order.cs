@@ -31,5 +31,11 @@ public class Order
     /// </summary>
     public DateTime? FechaPreparacionInicio { get; set; }
 
+    /// <summary>
+    /// Tiempo estimado de preparacion en minutos (XAV-199: configurable)
+    /// </summary>
+    public int? TiempoEstimadoPreparacionMinutos { get; set; }
+
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+    public ICollection<OrderStatusHistory> HistorialEstados { get; set; } = new List<OrderStatusHistory>();
 }
