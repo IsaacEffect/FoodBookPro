@@ -14,6 +14,7 @@ namespace FoodBookPro.Data.Context
 
         // Aquí registramos TODAS las tablas del equipo (XAV-53 + XAV-26)
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Propietario> Propietarios { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
