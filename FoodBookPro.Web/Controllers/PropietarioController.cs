@@ -43,5 +43,33 @@ namespace FoodBookPro.Web.Controllers
                 return Content(ex.Message);
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Aprobar(Guid id)
+        {
+            try
+            {
+                await _service.AprobarPropietarioAsync(id);
+                return Content("Propietario aprobado");
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Rechazar(Guid id)
+        {
+            try
+            {
+                await _service.RechazarPropietarioAsync(id);
+                return Content("Propietario rechazado");
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
     }
 }

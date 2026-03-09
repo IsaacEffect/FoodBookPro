@@ -31,5 +31,17 @@ namespace FoodBookPro.Data.Repositories
             return await _context.Propietarios
                 .AnyAsync(p => p.Email == email);
         }
+
+        public async Task<Propietario?> GetByIdAsync(Guid id)
+        {
+            return await _context.Propietarios
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task UpdateAsync(Propietario propietario)
+        {
+            _context.Propietarios.Update(propietario);
+            await _context.SaveChangesAsync();
+        }
     }
 }

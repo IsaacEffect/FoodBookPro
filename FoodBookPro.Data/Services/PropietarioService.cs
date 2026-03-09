@@ -47,5 +47,29 @@ namespace FoodBookPro.Data.Services
 
             return true;
         }
+
+        public async Task AprobarPropietarioAsync(Guid propietarioId)
+        {
+            var propietario = await _repository.GetByIdAsync(propietarioId);
+
+            if (propietario == null)
+                throw new Exception("Propietario no encontrado");
+
+            propietario.Estado = EstadoPropietario.Aprobado;
+
+            await _repository.UpdateAsync(propietario);
+        }
+
+        public async Task RechazarPropietarioAsync(Guid propietarioId)
+        {
+            var propietario = await _repository.GetByIdAsync(propietarioId);
+
+            if (propietario == null)
+                throw new Exception("Propietario no encontrado");
+
+            propietario.Estado = EstadoPropietario.Rechazado;
+
+            await _repository.UpdateAsync(propietario);
+        }
     }
 }

@@ -9,5 +9,7 @@ namespace FoodBookPro.Data.Interfaces
         Task<Propietario?> GetByEmailAsync(string email);
 
         Task<bool> ExistsByEmailAsync(string email);
+        Task<Propietario?> GetByIdAsync(Guid id);
+        Task UpdateAsync(Propietario propietario);
     }
 }
