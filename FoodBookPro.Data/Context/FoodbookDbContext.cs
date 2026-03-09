@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using FoodBookPro.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace FoodBookPro.Data.Context
 {
@@ -12,6 +13,7 @@ namespace FoodBookPro.Data.Context
         {
         }
 
+        // Aquí registramos TODAS las tablas del equipo (XAV-53 + XAV-26)
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
@@ -23,10 +25,15 @@ namespace FoodBookPro.Data.Context
                 optionsBuilder.UseInMemoryDatabase("FoodbookDb");
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+                optionsBuilder.UseInMemoryDatabase("FoodbookDb");
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
+            // Configuración de Clientes (de develop)
             modelBuilder.Entity<Cliente>(entity =>
             {
                 entity.HasKey(c => c.Id);
