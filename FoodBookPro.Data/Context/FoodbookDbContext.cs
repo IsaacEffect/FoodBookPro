@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using FoodBookPro.Data.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace FoodBookPro.Data.Context
 {
@@ -18,12 +17,6 @@ namespace FoodBookPro.Data.Context
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseInMemoryDatabase("FoodbookDb");
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
