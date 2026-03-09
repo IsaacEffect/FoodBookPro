@@ -44,5 +44,15 @@ namespace FoodBookPro.Data.Services
 
             return true;
         }
+
+        // LOGIN
+        public async Task<Cliente> AutenticarAsync(string email, string password)
+        {
+            var cliente = await _repository.GetByEmailAsync(email) ?? throw new Exception("Usuario no encontrado");
+            if (cliente.PasswordHash != password)
+                throw new Exception("Credenciales inválidas");
+
+            return cliente;
+        }
     }
 }
