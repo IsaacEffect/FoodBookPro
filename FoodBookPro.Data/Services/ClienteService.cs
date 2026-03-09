@@ -44,5 +44,21 @@ namespace FoodBookPro.Data.Services
 
             return true;
         }
+
+        // LOGIN
+        public async Task<Cliente> AutenticarAsync(string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new Exception("El email es obligatorio");
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new Exception("La contraseña es obligatoria");
+
+            var cliente = await _repository.GetByEmailAsync(email) ?? throw new Exception("Usuario no encontrado");
+            if (cliente.PasswordHash != password)
+                throw new Exception("Credenciales inválidas");
+
+            return cliente;
+        }
     }
 }
