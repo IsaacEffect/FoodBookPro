@@ -20,7 +20,8 @@ namespace FoodBookPro.Data.Context
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<Payment> Payments { get; set; }
-
+        public DbSet<Reserva> Reservas { get; set; }
+        public DbSet<DisponibilidadRestaurante> Disponibilidades { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

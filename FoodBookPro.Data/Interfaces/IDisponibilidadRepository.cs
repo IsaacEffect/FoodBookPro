@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
+using FoodBookPro.Data.Entities;
 public interface IDisponibilidadRepository
 {
     Task<DisponibilidadRestaurante?> ObtenerPorDiaAsync(DayOfWeek diaSemana);
