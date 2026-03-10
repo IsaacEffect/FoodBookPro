@@ -16,7 +16,13 @@ public class Reserva
     public DateTime? FechaModificacion { get; private set; }
 
     // Constructor privado para controlar la creación
-    private Reserva() { }
+    private Reserva() 
+    {
+        CodigoReserva = string.Empty;
+        NombreCliente = string.Empty;
+        EmailCliente = string.Empty;
+        TelefonoCliente = string.Empty;
+    }
 
     public static Reserva Crear(
         Guid clienteId,

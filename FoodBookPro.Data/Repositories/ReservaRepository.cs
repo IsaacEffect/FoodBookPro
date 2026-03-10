@@ -74,7 +74,7 @@ public class ReservaRepository : IReservaRepository
         if (estado.HasValue)
             query = query.Where(r => r.Estado == estado.Value);
 
-        return Task.FromResult(query.OrderBy(r => r.FechaHora));
+        return Task.FromResult(query.OrderBy(r => r.FechaHora).AsEnumerable());
     }
 
     // ── Gestión de estado ────────────────────────────────────────────

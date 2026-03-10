@@ -1,8 +1,8 @@
 ﻿using System;
 
-public Enum EstadoReserva
+public enum EstadoReserva
 {
-    Pendiente = 0,
+        Pendiente = 0,
         Confirmada = 1,
         Rechazada = 2,
         Cancelada = 3
