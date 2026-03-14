@@ -131,5 +131,52 @@ namespace FoodBookPro.Test
 
             Assert.Equal(EstadoPropietario.Rechazado, propietario.Estado);
         }
+
+        [Fact]
+        public async Task Login_Propietario_Aprobado_PuedeEntrar()
+        {
+            var propietario = new Propietario
+            {
+                Id = Guid.NewGuid(),
+                Nombre = "Richard Matos",
+                Email = "richard.matos24@gmail.com",
+                PasswordHash = "Rm2024$",
+                Estado = EstadoPropietario.Aprobado
+            };
+
+            _repoMock.Setup(r => r.GetByEmailAsync(propietario.Email))
+                     .ReturnsAsync(propietario);
+
+            var result = await _service.AutenticarAsync(
+                "richard.matos24@gmail.com",
+                "Rm2024$"
+            );
+
+            Assert.NotNull(result);
+            Assert.Equal("Richard Matos", result.Nombre);
+        }
+
+        [Fact]
+        public async Task Login_Propietario_Pendiente_NoPuedeEntrar()
+        {
+            var propietario = new Propietario
+            {
+                Id = Guid.NewGuid(),
+                Nombre = "Richard Matos",
+                Email = "richard.matos24@gmail.com",
+                PasswordHash = "Rm2024$",
+                Estado = EstadoPropietario.Pendiente
+            };
+
+            _repoMock.Setup(r => r.GetByEmailAsync(propietario.Email))
+                     .ReturnsAsync(propietario);
+
+            await Assert.ThrowsAsync<Exception>(() =>
+                _service.AutenticarAsync(
+                    "richard.matos24@gmail.com",
+                    "Rm2024$"
+                )
+            );
+        }
     }
 }
