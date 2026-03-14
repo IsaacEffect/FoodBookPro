@@ -71,5 +71,27 @@ namespace FoodBookPro.Data.Services
 
             await _repository.UpdateAsync(propietario);
         }
+
+        public async Task<Propietario> AutenticarAsync(string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new Exception("El email es obligatorio");
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new Exception("La contraseña es obligatoria");
+
+            var propietario = await _repository.GetByEmailAsync(email);
+
+            if (propietario == null)
+                throw new Exception("Usuario no encontrado");
+
+            if (propietario.PasswordHash != password)
+                throw new Exception("Credenciales inválidas");
+
+            if (propietario.Estado != EstadoPropietario.Aprobado)
+                throw new Exception("Tu restaurante aún no ha sido aprobado");
+
+            return propietario;
+        }
     }
 }
