@@ -1,40 +1,52 @@
 ﻿using FoodBookPro.Data.Context;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace FoodBookPro.Web.Controllers
 {
     public class RestaurantController : Controller
     {
         private readonly FoodbookDbContext _context;
-        private const int PageSize = 10; // Mantenemos el criterio de XAV-26
+        private const int PageSize = 10;
 
-        // Usamos tu constructor con Inyección de Dependencias (XAV-34)
         public RestaurantController(FoodbookDbContext context)
         {
             _context = context;
         }
 
+        // UN SOLO MÉTODO INDEX: Maneja tanto la carga inicial como los filtros
         public IActionResult Index(string searchString, string cuisine, string priceRange, double? minRating, double? maxDistance, string sortBy, int page = 1)
         {
             var query = _context.Restaurants.AsQueryable();
 
-            // --- 1. Tus Filtros Avanzados (XAV-34) ---
+            // --- 1. Filtros Avanzados (XAV-34) ---
             if (!string.IsNullOrEmpty(searchString))
+            {
                 query = query.Where(r => r.Name.Contains(searchString) || r.City.Contains(searchString));
+            }
 
             if (!string.IsNullOrEmpty(cuisine))
+            {
                 query = query.Where(r => r.CuisineType == cuisine);
+            }
 
             if (!string.IsNullOrEmpty(priceRange))
+            {
                 query = query.Where(r => r.PriceRange == priceRange);
+            }
 
             if (minRating.HasValue)
+            {
                 query = query.Where(r => r.Rating >= minRating.Value);
+            }
 
             if (maxDistance.HasValue)
+            {
                 query = query.Where(r => r.Distance <= maxDistance.Value);
+            }
 
-            // --- 2. Tu Lógica de Ordenamiento (XAV-34) ---
+            // --- 2. Lógica de Ordenamiento ---
             query = sortBy switch
             {
                 "rating" => query.OrderByDescending(r => r.Rating),
@@ -43,8 +55,10 @@ namespace FoodBookPro.Web.Controllers
                 _ => query.OrderBy(r => r.Name)
             };
 
-            // --- 3. Paginación de develop (XAV-26) ---
+            // --- 3. Paginación y Conteo ---
             var totalItems = query.Count();
+
+            // Si no hay resultados, al menos pasamos una lista vacía para que la vista no explote
             var results = query
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
@@ -60,6 +74,5 @@ namespace FoodBookPro.Web.Controllers
 
             return View(results);
         }
-
     }
 }

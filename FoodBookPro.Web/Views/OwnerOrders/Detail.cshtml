@@ -20,6 +20,23 @@
     <dt class="col-sm-2">Hora retiro</dt>
     <dd class="col-sm-10">@(Model.HoraRetiro?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
 
+    <dt class="col-sm-2">Tiempo estimado</dt>
+    <dd class="col-sm-10">
+        @if (Model.TiempoEstimadoPreparacionMinutos.HasValue)
+        {
+            @(Model.TiempoEstimadoPreparacionMinutos + " min")
+        }
+        else
+        {
+            <form asp-action="ConfigurarTiempoEstimado" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="number" name="minutos" value="15" min="1" max="480" class="form-control form-control-sm d-inline-block w-auto" />
+                <span>min</span>
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Guardar</button>
+            </form>
+        }
+    </dd>
+
     @if (Model.Estado == EstadoOrden.Preparando && Model.FechaPreparacionInicio.HasValue)
     {
         <dt class="col-sm-2">Timer preparacion</dt>
@@ -52,38 +69,49 @@
 
 <p><strong>Total: @Model.Total.ToString("C")</strong></p>
 
-@* Botones de accion (XAV-195): Aceptar, Rechazar, Marcar Preparando, Marcar Lista *@
+@* XAV-177: Cambio de estado con un clic, comentarios opcionales *@
+<p class="mb-1"><strong>Comentario (opcional):</strong></p>
+<input type="text" id="comentarioCambio" class="form-control mb-2" style="max-width:300px" placeholder="Ej: Ingredientes especiales..." />
+
 <div class="mt-4">
     @if (Model.Estado == EstadoOrden.Pendiente)
     {
-        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
             @Html.AntiForgeryToken()
             <input type="hidden" name="accion" value="aceptar" />
+            <input type="hidden" name="comentario" class="input-comentario" />
             <button type="submit" class="btn btn-success">Aceptar</button>
         </form>
-        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
             @Html.AntiForgeryToken()
             <input type="hidden" name="accion" value="rechazar" />
+            <input type="hidden" name="comentario" class="input-comentario" />
             <button type="submit" class="btn btn-danger">Rechazar</button>
         </form>
     }
     @if (Model.Estado == EstadoOrden.Pendiente || Model.Estado == EstadoOrden.Confirmada)
     {
-        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
             @Html.AntiForgeryToken()
             <input type="hidden" name="accion" value="preparando" />
+            <input type="hidden" name="comentario" class="input-comentario" />
             <button type="submit" class="btn btn-warning">Marcar como Preparando</button>
         </form>
     }
     @if (Model.Estado == EstadoOrden.Preparando)
     {
-        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
             @Html.AntiForgeryToken()
             <input type="hidden" name="accion" value="lista" />
+            <input type="hidden" name="comentario" class="input-comentario" />
             <button type="submit" class="btn btn-primary">Marcar como Lista</button>
         </form>
     }
 </div>
+
+@* XAV-200: Historial de cambios *@
+<h5 class="mt-4">Historial de cambios</h5>
+<div id="historialEstados"></div>
 
 <p class="mt-3">
     <a asp-action="Index" class="btn btn-secondary">Volver al panel</a>
@@ -101,5 +129,23 @@
                 el.textContent = (m + '').padStart(2, '0') + ':' + (s + '').padStart(2, '0');
             }, 1000);
         });
+        document.querySelectorAll('.form-cambio-estado').forEach(f => {
+            f.addEventListener('submit', function() {
+                var c = document.getElementById('comentarioCambio');
+                this.querySelector('.input-comentario').value = c ? c.value : '';
+            });
+        });
+        fetch('@Url.Action("HistorialEstados", "OwnerOrders", new { id = Model.Id })')
+            .then(r => r.json())
+            .then(data => {
+                var div = document.getElementById('historialEstados');
+                if (data.length === 0) div.innerHTML = '<p class="text-muted">Sin cambios aun.</p>';
+                else div.innerHTML = '<ul class="list-group">' + data.map(h =>
+                    '<li class="list-group-item">' + h.estadoAnterior + ' → ' + h.estadoNuevo +
+                    (h.comentario ? ' <em>' + h.comentario + '</em>' : '') +
+                    ' <small>' + new Date(h.fecha).toLocaleString() + '</small>' +
+                    (h.notificadoCliente ? ' <span class="badge bg-info">Notificado</span>' : '') + '</li>'
+                ).join('') + '</ul>';
+            });
     </script>
 }

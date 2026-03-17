@@ -21,6 +21,14 @@ namespace FoodBookPro.Web
 
             var app = builder.Build();
 
+            // Bloque temporal para llenar la base de datos
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<FoodBookPro.Data.Context.FoodbookDbContext>();
+                context.SeedData(); 
+            }
+
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<FoodbookDbContext>();
@@ -42,6 +50,12 @@ namespace FoodBookPro.Web
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<FoodbookDbContext>();
+                db.SeedData();
+            }
 
             app.Run();
         }

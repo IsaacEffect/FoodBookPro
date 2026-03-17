@@ -99,12 +99,11 @@ namespace FoodBookPro.Web.Controllers
         }
 
         /// <summary>
-        /// Actualiza el estado de una orden (criterio XAV-195: botones de accion)
-        /// Acciones: Accept, Reject, Preparando, Lista
+        /// Actualiza el estado de una orden (XAV-177: cambio con un clic, historial, comentarios, notificacion)
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStatus(int id, string accion)
+        public async Task<IActionResult> UpdateStatus(int id, string accion, string? comentario = null)
         {
             var order = await _db.Orders.FindAsync(id);
             if (order == null)
@@ -122,12 +121,20 @@ namespace FoodBookPro.Web.Controllers
             if (!nuevoEstado.HasValue)
                 return BadRequest("Accion no valida");
 
+            var estadoAnterior = order.Estado;
             order.Estado = nuevoEstado.Value;
 
             if (nuevoEstado == EstadoOrden.Preparando && !order.FechaPreparacionInicio.HasValue)
-            {
                 order.FechaPreparacionInicio = DateTime.Now;
-            }
+
+            _db.OrderStatusHistories.Add(new OrderStatusHistory
+            {
+                OrderId = id,
+                EstadoAnterior = estadoAnterior,
+                EstadoNuevo = nuevoEstado.Value,
+                Comentario = string.IsNullOrWhiteSpace(comentario) ? null : comentario.Trim(),
+                NotificadoCliente = true
+            });
 
             await _db.SaveChangesAsync();
 
@@ -135,6 +142,38 @@ namespace FoodBookPro.Web.Controllers
                 return Json(new { success = true, estado = order.Estado.ToString() });
 
             return RedirectToAction(nameof(Detail), new { id });
+        }
+
+        /// <summary>
+        /// Configura el tiempo estimado de preparacion (XAV-199)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfigurarTiempoEstimado(int id, int minutos)
+        {
+            var order = await _db.Orders.FindAsync(id);
+            if (order == null)
+                return NotFound();
+            if (minutos < 1 || minutos > 480)
+                return BadRequest("Minutos debe estar entre 1 y 480");
+
+            order.TiempoEstimadoPreparacionMinutos = minutos;
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Detail), new { id });
+        }
+
+        /// <summary>
+        /// Obtiene el historial de cambios de estado de una orden (XAV-200)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> HistorialEstados(int id)
+        {
+            var historial = await _db.OrderStatusHistories
+                .Where(h => h.OrderId == id)
+                .OrderByDescending(h => h.Fecha)
+                .ToListAsync();
+            return Json(historial.Select(h => new { h.EstadoAnterior, h.EstadoNuevo, h.Comentario, h.Fecha, h.NotificadoCliente }));
         }
 
         /// <summary>
