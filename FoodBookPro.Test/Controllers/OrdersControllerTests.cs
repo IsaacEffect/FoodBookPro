@@ -1,100 +1,76 @@
 using FoodBookPro.Data.Context;
 using FoodBookPro.Data.Entities;
 using FoodBookPro.Web.Controllers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace FoodBookPro.Test.Controllers;
 
+/// <summary>Pruebas mínimas para Ver Mis Órdenes (XAV-33).</summary>
 public class OrdersControllerTests
 {
-    private static FoodbookDbContext CrearDbContext()
+    private static FoodbookDbContext CrearDb()
     {
-        var options = new DbContextOptionsBuilder<FoodbookDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        var db = new FoodbookDbContext(options);
-        db.Orders.Add(new Order
-        {
-            Id = 1,
-            Fecha = DateTime.Now,
-            Estado = EstadoOrden.Completada,
-            RestauranteNombre = "Test",
-            Total = 25m,
-            Items = new List<OrderItem>
-            {
-                new() { Id = 1, OrderId = 1, ProductoNombre = "Pizza", Cantidad = 1, Precio = 25m }
-            }
-        });
+        var opt = new DbContextOptionsBuilder<FoodbookDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        var db = new FoodbookDbContext(opt);
+        db.Orders.Add(new Order { Id = 1, Fecha = DateTime.Now, Estado = EstadoOrden.Completada, RestauranteNombre = "Test", Total = 25m, Items = new List<OrderItem> { new() { Id = 1, OrderId = 1, ProductoNombre = "Pizza", Cantidad = 1, Precio = 25m } } });
         db.SaveChanges();
         return db;
     }
 
     [Fact]
-    public async Task Index_RetornaVistaConOrdenes()
+    public async Task Index_RetornaListaDeOrdenes()
     {
-        using var db = CrearDbContext();
-        var controller = new OrdersController(db);
-
-        var result = await controller.Index(null, null, null, null);
-
-        var viewResult = Assert.IsType<ViewResult>(result);
-        var model = Assert.IsAssignableFrom<FoodBookPro.Web.Models.OrderListViewModel>(viewResult.Model);
+        using var db = CrearDb();
+        var ctrl = new OrdersController(db);
+        var r = await ctrl.Index(null, null, null, null);
+        var view = Assert.IsType<Microsoft.AspNetCore.Mvc.ViewResult>(r);
+        var model = Assert.IsAssignableFrom<FoodBookPro.Web.Models.OrderListViewModel>(view.Model);
         Assert.Single(model.Orders);
         Assert.Equal("Test", model.Orders[0].RestauranteNombre);
     }
 
     [Fact]
-    public async Task Index_FiltroPorRestaurante_RetornaSoloCoincidentes()
+    public async Task Index_FiltroRestaurante_DevuelveCoincidentes()
     {
-        using var db = CrearDbContext();
-        var controller = new OrdersController(db);
-
-        var result = await controller.Index(null, null, null, "Test");
-
-        var viewResult = Assert.IsType<ViewResult>(result);
-        var model = Assert.IsAssignableFrom<FoodBookPro.Web.Models.OrderListViewModel>(viewResult.Model);
+        using var db = CrearDb();
+        var ctrl = new OrdersController(db);
+        var r = await ctrl.Index(null, null, null, "Test");
+        var view = Assert.IsType<Microsoft.AspNetCore.Mvc.ViewResult>(r);
+        var model = Assert.IsAssignableFrom<FoodBookPro.Web.Models.OrderListViewModel>(view.Model);
         Assert.Single(model.Orders);
     }
 
     [Fact]
-    public async Task Detail_OrdenExistente_RetornaVista()
+    public async Task Detail_OrdenExiste_RetornaVista()
     {
-        using var db = CrearDbContext();
-        var controller = new OrdersController(db);
-
-        var result = await controller.Detail(1);
-
-        var viewResult = Assert.IsType<ViewResult>(result);
-        var order = Assert.IsType<Order>(viewResult.Model);
+        using var db = CrearDb();
+        var ctrl = new OrdersController(db);
+        var r = await ctrl.Detail(1);
+        var view = Assert.IsType<Microsoft.AspNetCore.Mvc.ViewResult>(r);
+        var order = Assert.IsType<Order>(view.Model);
         Assert.Equal(1, order.Id);
         Assert.Single(order.Items);
     }
 
     [Fact]
-    public async Task Detail_OrdenNoExiste_RetornaNotFound()
+    public async Task Detail_OrdenNoExiste_NotFound()
     {
-        using var db = CrearDbContext();
-        var controller = new OrdersController(db);
-
-        var result = await controller.Detail(999);
-
-        Assert.IsType<NotFoundResult>(result);
+        using var db = CrearDb();
+        var ctrl = new OrdersController(db);
+        var r = await ctrl.Detail(999);
+        Assert.IsType<Microsoft.AspNetCore.Mvc.NotFoundResult>(r);
     }
 
     [Fact]
-    public async Task UpdateStatus_PendienteACancelada_ActualizaCorrectamente()
+    public async Task Cancel_Pendiente_CambiaACancelada()
     {
-        using var db = CrearDbContext();
+        using var db = CrearDb();
         db.Orders.Add(new Order { Id = 2, Fecha = DateTime.Now, Estado = EstadoOrden.Pendiente, RestauranteNombre = "R", Total = 10m });
         await db.SaveChangesAsync();
-
-        var controller = new OrdersController(db);
-        var result = await controller.UpdateStatus(2, EstadoOrden.Cancelada);
-
-        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        var ctrl = new OrdersController(db);
+        var r = await ctrl.Cancel(2);
+        Assert.IsType<Microsoft.AspNetCore.Mvc.RedirectToActionResult>(r);
         var order = await db.Orders.FindAsync(2);
         Assert.Equal(EstadoOrden.Cancelada, order!.Estado);
     }
