@@ -21,6 +21,14 @@ namespace FoodBookPro.Web
 
             var app = builder.Build();
 
+            // Bloque temporal para llenar la base de datos
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<FoodBookPro.Data.Context.FoodbookDbContext>();
+                context.SeedData(); 
+            }
+
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<FoodbookDbContext>();
