@@ -1,7 +1,7 @@
 namespace FoodBookPro.Data.Entities;
 
 /// <summary>
-/// Estados posibles de una orden segun criterios de aceptacion (XAV-176)
+/// Estados posibles de una orden
 /// </summary>
 public enum EstadoOrden
 {

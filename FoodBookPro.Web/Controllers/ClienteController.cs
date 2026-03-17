@@ -31,5 +31,28 @@ namespace FoodBookPro.Web.Controllers
                 return Content(ex.Message);
             }
         }
+
+        // ===== LOGIN =====
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(string email, string password)
+        {
+            try
+            {
+                var cliente = await _service.AutenticarAsync(email, password);
+
+                return Content($"Bienvenido {cliente.Nombre}");
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
     }
 }
