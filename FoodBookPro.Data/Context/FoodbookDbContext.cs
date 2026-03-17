@@ -9,13 +9,14 @@ namespace FoodBookPro.Data.Context
 
         public FoodbookDbContext(DbContextOptions<FoodbookDbContext> options) : base(options) { }
 
-        // Aquí registramos TODAS las tablas del equipo (XAV-53 + XAV-26)
+        // Aquí registramos TODAS las tablas del equipo (XAV-53 + XAV-26 + reservas)
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Payment> Payments { get; set; }
         // XAV-34: Buscador y Filtros Avanzados
         public DbSet<Restaurant> Restaurants { get; set; }
+        public DbSet<Reserva> Reservas { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
