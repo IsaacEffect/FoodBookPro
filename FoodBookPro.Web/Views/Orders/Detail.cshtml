@@ -1,6 +1,7 @@
 @model FoodBookPro.Data.Entities.Order
+@using FoodBookPro.Data.Entities
 @{
-    ViewData["Title"] = "Detalle Orden";
+    ViewData["Title"] = "Orden #" + Model.Id;
 }
 
 <h2>Orden #@Model.Id</h2>
@@ -8,41 +9,16 @@
 <dl class="row">
     <dt class="col-sm-2">Fecha</dt>
     <dd class="col-sm-10">@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</dd>
-
     <dt class="col-sm-2">Restaurante</dt>
     <dd class="col-sm-10">@Model.RestauranteNombre</dd>
-
     <dt class="col-sm-2">Estado</dt>
     <dd class="col-sm-10">
         <span class="badge bg-secondary">@Model.Estado</span>
-        @if (Model.Estado == FoodBookPro.Data.Entities.EstadoOrden.Pendiente)
+        @if (Model.Estado == EstadoOrden.Pendiente)
         {
-            <form asp-action="UpdateStatus" method="post" class="d-inline ms-2">
+            <form asp-action="Cancel" method="post" class="d-inline ms-2">
                 <input type="hidden" name="id" value="@Model.Id" />
-                <input type="hidden" name="nuevoEstado" value="@((int)FoodBookPro.Data.Entities.EstadoOrden.Cancelada)" />
                 <button type="submit" class="btn btn-sm btn-danger">Cancelar orden</button>
-            </form>
-        }
-        else if (Model.Estado != FoodBookPro.Data.Entities.EstadoOrden.Cancelada && Model.Estado != FoodBookPro.Data.Entities.EstadoOrden.Completada)
-        {
-            <form asp-action="UpdateStatus" method="post" class="d-inline ms-2">
-                <input type="hidden" name="id" value="@Model.Id" />
-                <select name="nuevoEstado" class="form-select form-select-sm d-inline-block w-auto">
-                    @switch (Model.Estado)
-                    {
-                        case FoodBookPro.Data.Entities.EstadoOrden.Confirmada:
-                            <option value="@((int)FoodBookPro.Data.Entities.EstadoOrden.Preparando)">Marcar Preparando</option>
-                            <option value="@((int)FoodBookPro.Data.Entities.EstadoOrden.Cancelada)">Cancelar</option>
-                            break;
-                        case FoodBookPro.Data.Entities.EstadoOrden.Preparando:
-                            <option value="@((int)FoodBookPro.Data.Entities.EstadoOrden.Lista)">Marcar Lista</option>
-                            break;
-                        case FoodBookPro.Data.Entities.EstadoOrden.Lista:
-                            <option value="@((int)FoodBookPro.Data.Entities.EstadoOrden.Completada)">Marcar Completada</option>
-                            break;
-                    }
-                </select>
-                <button type="submit" class="btn btn-sm btn-outline-primary">Actualizar</button>
             </form>
         }
     </dd>
@@ -50,32 +26,19 @@
 
 <h4>Items</h4>
 <table class="table">
-    <thead>
-        <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
+    <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
     <tbody>
         @foreach (var item in Model.Items)
         {
-            <tr>
-                <td>@item.ProductoNombre</td>
-                <td>@item.Cantidad</td>
-                <td>@item.Precio.ToString("C")</td>
-                <td>@item.Subtotal.ToString("C")</td>
-            </tr>
+            <tr><td>@item.ProductoNombre</td><td>@item.Cantidad</td><td>@item.Precio.ToString("C")</td><td>@item.Subtotal.ToString("C")</td></tr>
         }
     </tbody>
 </table>
-
 <p><strong>Total: @Model.Total.ToString("C")</strong></p>
 
 <div class="d-flex gap-2">
-    <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
-    @if (Model.Estado == FoodBookPro.Data.Entities.EstadoOrden.Completada)
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    @if (Model.Estado == EstadoOrden.Completada)
     {
         <a asp-action="Reorder" asp-route-id="@Model.Id" class="btn btn-primary">Reordenar</a>
     }
