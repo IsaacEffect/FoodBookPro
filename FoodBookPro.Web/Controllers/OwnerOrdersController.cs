@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FoodBookPro.Web.Controllers;
 
-/// <summary>Gestión de órdenes como propietario (XAV-176 + XAV-177).</summary>
+/// <summary>XAV-176 panel/cocina/filtros; XAV-177 cambio estado, historial, tiempo estimado.</summary>
 public class OwnerOrdersController : Controller
 {
     private readonly FoodbookDbContext _db;
