@@ -30,7 +30,13 @@
             <label class="form-label">Restaurante</label>
             <input type="text" name="restaurante" class="form-control" placeholder="Nombre..." value="@Model.FiltroRestaurante" />
         </div>
-        <div class="col-md-2 d-flex align-items-end">
+        <div class="col-md-2">
+            <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" name="soloAnticipadas" value="true" id="soloAnticipadas" @(Model.SoloAnticipadas ? "checked" : null) />
+                <label class="form-check-label" for="soloAnticipadas">Solo anticipadas</label>
+            </div>
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
             <button type="submit" class="btn btn-primary">Filtrar</button>
         </div>
     </div>
@@ -44,13 +50,14 @@ else
 {
     <table class="table">
         <thead>
-            <tr><th>Fecha</th><th>Restaurante</th><th>Estado</th><th>Total</th><th></th></tr>
+            <tr><th>Fecha</th><th>Retiro</th><th>Restaurante</th><th>Estado</th><th>Total</th><th></th></tr>
         </thead>
         <tbody>
             @foreach (var o in Model.Orders)
             {
                 <tr>
                     <td>@o.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(o.HoraRetiro.HasValue ? o.HoraRetiro.Value.ToString("dd/MM HH:mm") : "—")</td>
                     <td>@o.RestauranteNombre</td>
                     <td><span class="badge bg-secondary">@o.Estado</span></td>
                     <td>@o.Total.ToString("C")</td>

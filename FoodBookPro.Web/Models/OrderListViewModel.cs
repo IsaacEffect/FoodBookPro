@@ -14,6 +14,7 @@ public class OrderListViewModel
     public DateTime? FiltroFechaDesde { get; set; }
     public DateTime? FiltroFechaHasta { get; set; }
     public string? FiltroRestaurante { get; set; }
+    public bool SoloAnticipadas { get; set; }
 }
 
 public class OrderListItemViewModel
@@ -23,4 +24,5 @@ public class OrderListItemViewModel
     public EstadoOrden Estado { get; set; }
     public string RestauranteNombre { get; set; } = string.Empty;
     public decimal Total { get; set; }
+    public DateTime? HoraRetiro { get; set; }
 }

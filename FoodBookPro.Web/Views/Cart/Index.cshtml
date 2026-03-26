@@ -50,4 +50,7 @@ else
         </tbody>
     </table>
     <p><strong>Total: @Model.Total.ToString("C")</strong> <small class="text-muted">(se actualiza al pulsar OK)</small></p>
+    <p>
+        <a asp-controller="AdvanceOrder" asp-action="Schedule" class="btn btn-success">Orden anticipada</a>
+    </p>
 }

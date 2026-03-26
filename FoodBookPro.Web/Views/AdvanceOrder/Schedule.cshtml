@@ -1,0 +1,40 @@
+@model FoodBookPro.Web.Models.AdvanceScheduleViewModel
+@{
+    ViewData["Title"] = "Orden anticipada";
+    var min = DateTime.Now.AddMinutes(31).ToString("yyyy-MM-ddTHH:mm");
+    var max = DateTime.Now.AddDays(14).ToString("yyyy-MM-ddTHH:mm");
+}
+
+<h2>Orden anticipada</h2>
+
+@if (TempData["AdvanceOrderError"] is string err)
+{
+    <div class="alert alert-warning">@err</div>
+}
+
+<p><strong>Restaurante:</strong> @Model.RestauranteNombre</p>
+
+<table class="table table-sm">
+    <thead><tr><th>Producto</th><th>Cant.</th><th>Subtotal</th></tr></thead>
+    <tbody>
+        @foreach (var i in Model.Items)
+        {
+            <tr><td>@i.Name</td><td>@i.Quantity</td><td>@i.Subtotal.ToString("C")</td></tr>
+        }
+    </tbody>
+</table>
+<p><strong>Total:</strong> @Model.Items.Sum(x => x.Subtotal).ToString("C")</p>
+
+<form asp-action="Place" method="post" class="mt-3">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label" for="horaRetiro">Hora de retiro</label>
+        <input class="form-control" type="datetime-local" id="horaRetiro" name="horaRetiro" required min="@min" max="@max" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="customerName">Nombre (opcional)</label>
+        <input class="form-control" type="text" id="customerName" name="customerName" maxlength="100" />
+    </div>
+    <button type="submit" class="btn btn-primary">Confirmar orden anticipada</button>
+    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">Volver al carrito</a>
+</form>

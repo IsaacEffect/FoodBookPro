@@ -14,19 +14,28 @@ public class OrdersController : Controller
 
     public OrdersController(FoodbookDbContext db) => _db = db;
 
-    public async Task<IActionResult> Index(EstadoOrden? estado, DateTime? fechaDesde, DateTime? fechaHasta, string? restaurante)
+    public async Task<IActionResult> Index(EstadoOrden? estado, DateTime? fechaDesde, DateTime? fechaHasta, string? restaurante, bool soloAnticipadas = false)
     {
         var query = _db.Orders.AsQueryable();
         if (estado.HasValue) query = query.Where(o => o.Estado == estado.Value);
         if (fechaDesde.HasValue) query = query.Where(o => o.Fecha.Date >= fechaDesde.Value.Date);
         if (fechaHasta.HasValue) query = query.Where(o => o.Fecha.Date <= fechaHasta.Value.Date);
         if (!string.IsNullOrWhiteSpace(restaurante)) query = query.Where(o => o.RestauranteNombre.Contains(restaurante));
+        if (soloAnticipadas) query = query.Where(o => o.HoraRetiro != null);
 
         var orders = await query.OrderByDescending(o => o.Fecha)
-            .Select(o => new OrderListItemViewModel { Id = o.Id, Fecha = o.Fecha, Estado = o.Estado, RestauranteNombre = o.RestauranteNombre, Total = o.Total })
+            .Select(o => new OrderListItemViewModel { Id = o.Id, Fecha = o.Fecha, Estado = o.Estado, RestauranteNombre = o.RestauranteNombre, Total = o.Total, HoraRetiro = o.HoraRetiro })
             .ToListAsync();
 
-        return View(new OrderListViewModel { Orders = orders, FiltroEstado = estado, FiltroFechaDesde = fechaDesde, FiltroFechaHasta = fechaHasta, FiltroRestaurante = restaurante });
+        return View(new OrderListViewModel
+        {
+            Orders = orders,
+            FiltroEstado = estado,
+            FiltroFechaDesde = fechaDesde,
+            FiltroFechaHasta = fechaHasta,
+            FiltroRestaurante = restaurante,
+            SoloAnticipadas = soloAnticipadas
+        });
     }
 
     public async Task<IActionResult> Detail(int id)
