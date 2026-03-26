@@ -3,7 +3,11 @@
     ViewData["Title"] = "Carrito";
 }
 
-<h2>Carrito de reorden</h2>
+<h2>Carrito</h2>
+<p>
+    <a asp-action="Add" class="btn btn-primary btn-sm">Agregar platos</a>
+    <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-secondary btn-sm">Mis órdenes</a>
+</p>
 
 @if (!string.IsNullOrEmpty(Model.RestauranteNombre))
 {
@@ -12,32 +16,38 @@
 
 @if (Model.Items.Count == 0)
 {
-    <p>El carrito esta vacio. Usa "Reordenar" en una orden completada para agregar items.</p>
-    <a asp-controller="Orders" asp-action="Index" class="btn btn-secondary">Ver mis ordenes</a>
+    <p>El carrito está vacío.</p>
 }
 else
 {
     <table class="table">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
+        <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
         <tbody>
-            @foreach (var item in Model.Items)
+            @for (var i = 0; i < Model.Items.Count; i++)
             {
+                var item = Model.Items[i];
                 <tr>
                     <td>@item.Name</td>
-                    <td>@item.Quantity</td>
+                    <td>
+                        <form asp-action="UpdateQuantity" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="index" value="@i" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm qty" style="width:70px;display:inline-block" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">OK</button>
+                        </form>
+                    </td>
                     <td>@item.Price.ToString("C")</td>
                     <td>@item.Subtotal.ToString("C")</td>
+                    <td>
+                        <form asp-action="Remove" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="index" value="@i" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button>
+                        </form>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
-    <p><strong>Total: @Model.Total.ToString("C")</strong></p>
-    <a asp-controller="Orders" asp-action="Index" class="btn btn-secondary">Volver a mis ordenes</a>
+    <p><strong>Total: @Model.Total.ToString("C")</strong> <small class="text-muted">(se actualiza al pulsar OK)</small></p>
 }

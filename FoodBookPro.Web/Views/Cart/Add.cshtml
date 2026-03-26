@@ -3,30 +3,28 @@
     ViewData["Title"] = "Agregar al carrito";
 }
 
-<h2>Agregar producto al carrito</h2>
-
-<p>Selecciona un producto y la cantidad para agregar.</p>
+<h2>Agregar platos</h2>
+<p><a asp-action="Index" class="btn btn-outline-secondary">Ver carrito</a></p>
 
 <div class="row">
-    @foreach (var product in Model)
+    @foreach (var p in Model)
     {
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">@product.Name</h5>
-                    <p class="card-text">@product.Price.ToString("C")</p>
+                    <h5>@p.Name</h5>
+                    <p>@p.Price.ToString("C")</p>
                     <form asp-action="AddItem" method="post">
-                        <input type="hidden" name="productId" value="@product.ProductId" />
-                        <div class="mb-2">
-                            <label>Cantidad:</label>
-                            <input type="number" name="quantity" value="1" min="1" class="form-control" style="width: 80px" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Agregar al carrito</button>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@p.ProductId" />
+                        <input type="hidden" name="name" value="@p.Name" />
+                        <input type="hidden" name="price" value="@p.Price" />
+                        <label>Cantidad</label>
+                        <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" style="width:90px" />
+                        <button type="submit" class="btn btn-primary btn-sm">Agregar</button>
                     </form>
                 </div>
             </div>
         </div>
     }
 </div>
-
-<a asp-action="Index" class="btn btn-secondary">Ver carrito</a>

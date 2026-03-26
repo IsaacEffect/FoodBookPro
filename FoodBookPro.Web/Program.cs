@@ -15,24 +15,11 @@ namespace FoodBookPro.Web
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession();
 
-            // Sesion para el carrito (almacenamiento en memoria)
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession();
-
             var app = builder.Build();
 
-            // Bloque temporal para llenar la base de datos
             using (var scope = app.Services.CreateScope())
             {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<FoodBookPro.Data.Context.FoodbookDbContext>();
-                context.SeedData(); 
-            }
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<FoodbookDbContext>();
-                db.SeedData();
+                scope.ServiceProvider.GetRequiredService<FoodbookDbContext>().SeedData();
             }
 
             // Configure the HTTP request pipeline.
@@ -50,12 +37,6 @@ namespace FoodBookPro.Web
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<FoodbookDbContext>();
-                db.SeedData();
-            }
 
             app.Run();
         }
