@@ -1,4 +1,5 @@
 using FoodBookPro.Data.Context;
+using FoodBookPro.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace FoodBookPro.Web
@@ -14,6 +15,7 @@ namespace FoodBookPro.Web
                 options.UseInMemoryDatabase("FoodbookDb"));
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession();
+            builder.Services.AddSingleton<IAdvanceOrderNotifier, NoOpAdvanceOrderNotifier>();
 
             var app = builder.Build();
 

@@ -6,11 +6,21 @@
 
 <h2>Orden #@Model.Id</h2>
 
+@if (TempData["AdvanceOrderOk"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
 <dl class="row">
     <dt class="col-sm-2">Fecha</dt>
     <dd class="col-sm-10">@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</dd>
     <dt class="col-sm-2">Restaurante</dt>
     <dd class="col-sm-10">@Model.RestauranteNombre</dd>
+    @if (Model.HoraRetiro.HasValue)
+    {
+        <dt class="col-sm-2">Retiro anticipado</dt>
+        <dd class="col-sm-10">@Model.HoraRetiro.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+    }
     <dt class="col-sm-2">Estado</dt>
     <dd class="col-sm-10">
         <span class="badge bg-secondary">@Model.Estado</span>
