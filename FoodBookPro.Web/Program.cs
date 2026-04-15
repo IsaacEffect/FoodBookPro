@@ -9,7 +9,7 @@ namespace FoodBookPro.Web
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            //a
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<FoodbookDbContext>(options =>
                 options.UseInMemoryDatabase("FoodbookDb"));
