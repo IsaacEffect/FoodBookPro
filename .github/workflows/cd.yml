@@ -61,23 +61,29 @@ jobs:
         with:
           name: .net-app
 
+      
       - name: Set environment variables based on branch
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
             echo "APP_NAME=FoodBookProDev" >> $GITHUB_ENV
-            echo "PUBLISH_PROFILE=${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_DEV }}" >> $GITHUB_ENV
+            echo "PROFILE=DEV" >> $GITHUB_ENV
           elif [[ "${GITHUB_REF}" == "refs/heads/qa" ]]; then
             echo "APP_NAME=FoodBookProQa" >> $GITHUB_ENV
-            echo "PUBLISH_PROFILE=${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_QA }}" >> $GITHUB_ENV
+            echo "PROFILE=QA" >> $GITHUB_ENV
           elif [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
             echo "APP_NAME=FoodBookPro" >> $GITHUB_ENV
-            echo "PUBLISH_PROFILE=${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}" >> $GITHUB_ENV
+            echo "PROFILE=PROD" >> $GITHUB_ENV
           fi
-          
+
+      
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.APP_NAME }}
-          publish-profile: ${{ env.PUBLISH_PROFILE }}
+          publish-profile: ${{ 
+            env.PROFILE == 'DEV' && secrets.AZURE_WEBAPP_PUBLISH_PROFILE_DEV || 
+            env.PROFILE == 'QA' && secrets.AZURE_WEBAPP_PUBLISH_PROFILE_QA || 
+            secrets.AZURE_WEBAPP_PUBLISH_PROFILE 
+          }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
