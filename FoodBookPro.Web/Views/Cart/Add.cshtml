@@ -1,0 +1,30 @@
+@model List<FoodBookPro.Web.Models.CartItemViewModel>
+@{
+    ViewData["Title"] = "Agregar al carrito";
+}
+
+<h2>Agregar platos</h2>
+<p><a asp-action="Index" class="btn btn-outline-secondary">Ver carrito</a></p>
+
+<div class="row">
+    @foreach (var p in Model)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5>@p.Name</h5>
+                    <p>@p.Price.ToString("C")</p>
+                    <form asp-action="AddItem" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@p.ProductId" />
+                        <input type="hidden" name="name" value="@p.Name" />
+                        <input type="hidden" name="price" value="@p.Price" />
+                        <label>Cantidad</label>
+                        <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" style="width:90px" />
+                        <button type="submit" class="btn btn-primary btn-sm">Agregar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,56 @@
+@model FoodBookPro.Web.Models.CartViewModel
+@{
+    ViewData["Title"] = "Carrito";
+}
+
+<h2>Carrito</h2>
+<p>
+    <a asp-action="Add" class="btn btn-primary btn-sm">Agregar platos</a>
+    <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-secondary btn-sm">Mis órdenes</a>
+</p>
+
+@if (!string.IsNullOrEmpty(Model.RestauranteNombre))
+{
+    <p><strong>Restaurante:</strong> @Model.RestauranteNombre</p>
+}
+
+@if (Model.Items.Count == 0)
+{
+    <p>El carrito está vacío.</p>
+}
+else
+{
+    <table class="table">
+        <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
+        <tbody>
+            @for (var i = 0; i < Model.Items.Count; i++)
+            {
+                var item = Model.Items[i];
+                <tr>
+                    <td>@item.Name</td>
+                    <td>
+                        <form asp-action="UpdateQuantity" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="index" value="@i" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm qty" style="width:70px;display:inline-block" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">OK</button>
+                        </form>
+                    </td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.Subtotal.ToString("C")</td>
+                    <td>
+                        <form asp-action="Remove" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="index" value="@i" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p><strong>Total: @Model.Total.ToString("C")</strong> <small class="text-muted">(se actualiza al pulsar OK)</small></p>
+    <p>
+        <a asp-controller="AdvanceOrder" asp-action="Schedule" class="btn btn-success">Orden anticipada</a>
+    </p>
+}

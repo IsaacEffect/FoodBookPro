@@ -1,0 +1,56 @@
+@model FoodBookPro.Data.Entities.Order
+@using FoodBookPro.Data.Entities
+@{
+    ViewData["Title"] = "Orden #" + Model.Id;
+}
+
+<h2>Orden #@Model.Id</h2>
+
+@if (TempData["AdvanceOrderOk"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-2">Fecha</dt>
+    <dd class="col-sm-10">@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-2">Restaurante</dt>
+    <dd class="col-sm-10">@Model.RestauranteNombre</dd>
+    @if (Model.HoraRetiro.HasValue)
+    {
+        <dt class="col-sm-2">Retiro anticipado</dt>
+        <dd class="col-sm-10">@Model.HoraRetiro.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+    }
+    <dt class="col-sm-2">Estado</dt>
+    <dd class="col-sm-10">
+        <span class="badge bg-secondary">@Model.Estado</span>
+        @if (Model.Estado == EstadoOrden.Pendiente)
+        {
+            <form asp-action="Cancel" method="post" class="d-inline ms-2">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-sm btn-danger">Cancelar orden</button>
+            </form>
+        }
+    </dd>
+</dl>
+
+<h4>Items</h4>
+<table class="table">
+    <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr><td>@item.ProductoNombre</td><td>@item.Cantidad</td><td>@item.Precio.ToString("C")</td><td>@item.Subtotal.ToString("C")</td></tr>
+        }
+    </tbody>
+</table>
+<p><strong>Total: @Model.Total.ToString("C")</strong></p>
+
+<div class="d-flex gap-2">
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    @if (Model.Estado == EstadoOrden.Completada)
+    {
+        <a asp-action="Reorder" asp-route-id="@Model.Id" class="btn btn-primary">Reordenar</a>
+    }
+    <a asp-action="DownloadReceipt" asp-route-id="@Model.Id" class="btn btn-outline-success" target="_blank">Descargar comprobante</a>
+</div>

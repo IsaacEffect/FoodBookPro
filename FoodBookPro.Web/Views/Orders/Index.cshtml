@@ -1,0 +1,75 @@
+@model FoodBookPro.Web.Models.OrderListViewModel
+@using FoodBookPro.Data.Entities
+@{
+    ViewData["Title"] = "Mis Órdenes";
+}
+
+<h2>Mis Órdenes</h2>
+
+<form method="get" asp-action="Index" class="mb-4 p-3 bg-light rounded">
+    <div class="row g-3">
+        <div class="col-md-2">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-select">
+                <option value="">Todos</option>
+                @foreach (EstadoOrden e in Enum.GetValues(typeof(EstadoOrden)))
+                {
+                    <option value="@((int)e)" selected="@(Model.FiltroEstado == e)">@e</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Desde</label>
+            <input type="date" name="fechaDesde" class="form-control" value="@Model.FiltroFechaDesde?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Hasta</label>
+            <input type="date" name="fechaHasta" class="form-control" value="@Model.FiltroFechaHasta?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Restaurante</label>
+            <input type="text" name="restaurante" class="form-control" placeholder="Nombre..." value="@Model.FiltroRestaurante" />
+        </div>
+        <div class="col-md-2">
+            <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" name="soloAnticipadas" value="true" id="soloAnticipadas" @(Model.SoloAnticipadas ? "checked" : null) />
+                <label class="form-check-label" for="soloAnticipadas">Solo anticipadas</label>
+            </div>
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+    </div>
+</form>
+
+@if (Model.Orders.Count == 0)
+{
+    <p>No hay órdenes.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>Fecha</th><th>Retiro</th><th>Restaurante</th><th>Estado</th><th>Total</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var o in Model.Orders)
+            {
+                <tr>
+                    <td>@o.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(o.HoraRetiro.HasValue ? o.HoraRetiro.Value.ToString("dd/MM HH:mm") : "—")</td>
+                    <td>@o.RestauranteNombre</td>
+                    <td><span class="badge bg-secondary">@o.Estado</span></td>
+                    <td>@o.Total.ToString("C")</td>
+                    <td>
+                        <a asp-action="Detail" asp-route-id="@o.Id" class="btn btn-sm btn-outline-primary">Ver</a>
+                        @if (o.Estado == EstadoOrden.Completada)
+                        {
+                            <a asp-action="Reorder" asp-route-id="@o.Id" class="btn btn-sm btn-outline-success">Reordenar</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

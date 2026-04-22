@@ -1,0 +1,110 @@
+@model FoodBookPro.Data.Entities.Order
+@using FoodBookPro.Data.Entities
+@{
+    ViewData["Title"] = "Orden #" + Model.Id;
+}
+
+<h2>Orden #@Model.Id</h2>
+
+<dl class="row">
+    <dt class="col-sm-2">Fecha</dt>
+    <dd class="col-sm-10">@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-2">Restaurante</dt>
+    <dd class="col-sm-10">@Model.RestauranteNombre</dd>
+    <dt class="col-sm-2">Estado</dt>
+    <dd class="col-sm-10"><span class="badge bg-secondary">@Model.Estado</span></dd>
+    <dt class="col-sm-2">Hora retiro</dt>
+    <dd class="col-sm-10">@(Model.HoraRetiro?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+    <dt class="col-sm-2">Tiempo estimado</dt>
+    <dd class="col-sm-10">
+        @if (Model.TiempoEstimadoPreparacionMinutos.HasValue)
+        { @(Model.TiempoEstimadoPreparacionMinutos + " min") }
+        else
+        {
+            <form asp-action="ConfigurarTiempoEstimado" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="number" name="minutos" value="15" min="1" max="480" class="form-control form-control-sm d-inline-block w-auto" />
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Guardar</button>
+            </form>
+        }
+    </dd>
+    @if (Model.Estado == EstadoOrden.Preparando && Model.FechaPreparacionInicio.HasValue)
+    {
+        <dt class="col-sm-2">Timer</dt>
+        <dd class="col-sm-10"><span class="timer" data-inicio="@Model.FechaPreparacionInicio.Value.ToString("O")">--:--</span></dd>
+    }
+</dl>
+
+<h4>Items</h4>
+<table class="table">
+    <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr><td>@item.ProductoNombre</td><td>@item.Cantidad</td><td>@item.Precio.ToString("C")</td><td>@item.Subtotal.ToString("C")</td></tr>
+        }
+    </tbody>
+</table>
+<p><strong>Total: @Model.Total.ToString("C")</strong></p>
+
+<p class="mb-1"><strong>Comentario (opcional):</strong></p>
+<input type="text" id="comentarioCambio" class="form-control mb-2" style="max-width:300px" placeholder="Ej: Ingredientes especiales..." />
+
+<div class="mt-4">
+    @if (Model.Estado == EstadoOrden.Pendiente)
+    {
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="accion" value="aceptar" />
+            <input type="hidden" name="comentario" class="input-comentario" />
+            <button type="submit" class="btn btn-success">Aceptar</button>
+        </form>
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="accion" value="rechazar" />
+            <input type="hidden" name="comentario" class="input-comentario" />
+            <button type="submit" class="btn btn-danger">Rechazar</button>
+        </form>
+    }
+    @if (Model.Estado == EstadoOrden.Pendiente || Model.Estado == EstadoOrden.Confirmada)
+    {
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="accion" value="preparando" />
+            <input type="hidden" name="comentario" class="input-comentario" />
+            <button type="submit" class="btn btn-warning">Marcar Preparando</button>
+        </form>
+    }
+    @if (Model.Estado == EstadoOrden.Preparando)
+    {
+        <form asp-controller="OwnerOrders" asp-action="UpdateStatus" asp-route-id="@Model.Id" method="post" class="d-inline form-cambio-estado">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="accion" value="lista" />
+            <input type="hidden" name="comentario" class="input-comentario" />
+            <button type="submit" class="btn btn-primary">Marcar Lista</button>
+        </form>
+    }
+</div>
+
+<h5 class="mt-4">Historial</h5>
+<div id="historialEstados"></div>
+
+<p class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    <a asp-action="Kitchen" class="btn btn-outline-success">Vista Cocina</a>
+</p>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.timer').forEach(el => {
+    setInterval(() => { const i = new Date(el.dataset.inicio); const d = Math.floor((Date.now() - i) / 1000); el.textContent = Math.floor(d/60).toString().padStart(2,'0') + ':' + (d%60).toString().padStart(2,'0'); }, 1000);
+});
+document.querySelectorAll('.form-cambio-estado').forEach(f => {
+    f.addEventListener('submit', function() { var c = document.getElementById('comentarioCambio'); this.querySelector('.input-comentario').value = c ? c.value : ''; });
+});
+fetch('@Url.Action("HistorialEstados", "OwnerOrders", new { id = Model.Id })').then(r => r.json()).then(data => {
+    var div = document.getElementById('historialEstados');
+    div.innerHTML = data.length === 0 ? '<p class="text-muted">Sin cambios.</p>' : '<ul class="list-group">' + data.map(h => '<li class="list-group-item">' + h.estadoAnterior + ' → ' + h.estadoNuevo + (h.comentario ? ' <em>' + h.comentario + '</em>' : '') + ' <small>' + new Date(h.fecha).toLocaleString() + '</small>' + (h.notificadoCliente ? ' <span class="badge bg-info">Notificado</span>' : '') + '</li>').join('') + '</ul>';
+});
+</script>
+}
