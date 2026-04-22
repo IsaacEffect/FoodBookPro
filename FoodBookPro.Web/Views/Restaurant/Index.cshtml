@@ -1,0 +1,66 @@
+@model IEnumerable<FoodBookPro.Data.Entities.Restaurant>
+
+@{
+    ViewData["Title"] = "Explorar Restaurantes";
+}
+
+<div class="alert alert-danger text-center">¡CARGANDO VISTA CORRECTA!</div>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Explorar Restaurantes</h2>
+            <span class="badge bg-primary fs-6">Se encontraron @ViewBag.TotalResults resultados</span>
+        </div>
+        <button class="btn btn-primary shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#mapSection">
+            <i class="bi bi-map-fill"></i> Ver en Mapa
+        </button>
+    </div>
+
+    <div class="collapse mb-4" id="mapSection">
+        <div class="card shadow-sm border-primary">
+            <div id="restaurantMap" style="height: 450px; border-radius: 8px; background-color: #eee;"></div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <p class="card-text">
+                            <span class="distancia-label" data-lat="@item.Latitude" data-lng="@item.Longitude">(@item.Distance km)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <script>
+        console.log("Script del mapa cargado"); // Esto saldrá en la consola (F12)
+        document.addEventListener('DOMContentLoaded', function () {
+            var map = L.map('restaurantMap').setView([18.4861, -69.9312], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            var restaurantes = @Json.Serialize(Model);
+            restaurantes.forEach(function (res) {
+                if (res.latitude && res.longitude) {
+                    L.marker([res.latitude, res.longitude]).addTo(map).bindPopup(res.name);
+                }
+            });
+
+            document.getElementById('mapSection').addEventListener('shown.bs.collapse', function () {
+                map.invalidateSize();
+            });
+        });
+    </script>
+}
